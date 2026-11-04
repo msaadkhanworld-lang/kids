@@ -1,834 +1,767 @@
+
+kids_dashboard.html
+100%
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperKids Quest - Daily Task & Progress Dashboard</title>
-    <!-- Tailwind CSS -->
+    <title>Kids Progress & Reward Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Canvas Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            purple: '#8B5CF6',
-                            pink: '#EC4899',
-                            amber: '#F59E0B',
-                            emerald: '#10B981',
-                            blue: '#3B82F6'
-                        }
-                    },
-                    fontFamily: {
-                        fredoka: ['Fredoka', 'sans-serif'],
-                        sans: ['Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Fredoka', sans-serif;
-            background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #EEF2FF 100%);
-            min-height: 100vh;
-        }
-        .bouncy {
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
-        }
-        .bouncy:hover {
-            transform: translateY(-4px) scale(1.02);
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(12px);
-            border: 2px solid rgba(255, 255, 255, 0.7);
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(16px); border: 1px solid rgba(226, 232, 240, 0.8); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass-panel:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02); }
+        .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 700; }
+        .tab-inactive { color: #64748b; font-weight: 500; }
+        .tab-inactive:hover { color: #334155; }
+        
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px rgba(79, 70, 229, 0.3); } 50% { box-shadow: 0 0 30px rgba(79, 70, 229, 0.6); } }
+        .glow-card { animation: pulse-glow 3s infinite; }
+
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .shimmer-bg { background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%); background-size: 200% 100%; animation: shimmer 3s infinite; }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="text-slate-800 antialiased selection:bg-pink-300">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
-    <!-- NAVIGATION HEADER -->
-    <header class="w-full bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200 sticky top-0 z-30">
+    <!-- Top Navigation Bar -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            
-            <!-- Logo & Brand -->
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="showView('kids')">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-lg shadow-orange-300/50 transform rotate-3">
-                    <i class="fa-solid fa-trophy text-2xl"></i>
+            <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchView('dashboard')">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform duration-300">
+                    <i class="fa-solid fa-trophy text-xl animate-bounce"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-500 to-amber-500 bg-clip-text text-transparent">
-                        Kids Star Dashboard
-                    </h1>
-                    <p class="text-xs text-slate-500 font-sans font-medium">Daily Task & Score Tracker</p>
+                    <h1 class="font-heading font-extrabold text-xl text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">Kids Progress Hub</h1>
+                    <p class="text-xs text-slate-500 font-medium">Daily Goals, Tasks & Rewards</p>
                 </div>
             </div>
 
-            <!-- Navigation Buttons -->
             <div class="flex items-center space-x-3">
-                <button id="nav-kids-btn" onclick="showView('kids')" class="px-4 py-2.5 rounded-full font-bold text-sm transition-all duration-300 flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-300">
-                    <i class="fa-solid fa-gamepad"></i>
-                    <span class="hidden sm:inline">Kids View</span>
-                </button>
-                <button id="nav-parent-btn" onclick="openParentGate()" class="px-4 py-2.5 rounded-full font-bold text-sm text-slate-700 hover:bg-slate-100 transition-all duration-300 flex items-center space-x-2 border border-slate-300 bg-white">
-                    <i class="fa-solid fa-lock text-amber-500"></i>
-                    <span>Parent Entry Page</span>
+                <div id="current-date-display" class="hidden sm:flex items-center text-xs font-semibold bg-slate-100/80 text-slate-600 px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs">
+                    <i class="fa-regular fa-calendar-days mr-2 text-indigo-500"></i> <span id="header-date-text"></span>
+                </div>
+                <button onclick="openParentModal()" class="flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white px-4.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-md shadow-slate-900/10 hover:shadow-lg active:scale-95 group">
+                    <i class="fa-solid fa-lock text-xs text-indigo-400 group-hover:rotate-12 transition-transform"></i>
+                    <span>Parent Admin</span>
                 </button>
             </div>
-
         </div>
     </header>
 
-    <!-- MAIN BODY CONTAINER -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-        <!-- ========================================== -->
-        <!-- VIEW 1: PUBLIC KIDS DASHBOARD PAGE          -->
-        <!-- ========================================== -->
-        <section id="kids-view" class="space-y-8">
-            
-            <!-- Welcome Header Banner -->
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white p-6 sm:p-8 shadow-xl">
-                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div>
-                        <span class="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold uppercase tracking-wider text-amber-300 backdrop-blur-sm">
-                            <i class="fa-solid fa-star mr-1"></i> Public Display Mode
-                        </span>
-                        <h2 class="text-3xl sm:text-4xl font-extrabold mt-2">Today's Star Champions! 🏆</h2>
-                        <p class="text-purple-100 mt-1 font-sans text-sm sm:text-base max-w-xl">
-                            Complete your daily studies and chores every day to earn stars, increase your streak, and unlock legend badges!
-                        </p>
-                    </div>
-                    <div class="flex items-center bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 shrink-0">
-                        <div class="text-center px-4 border-r border-white/20">
-                            <span class="text-xs text-purple-200 block uppercase font-sans font-semibold">Today</span>
-                            <span id="display-date" class="text-base font-bold text-amber-300">--</span>
-                        </div>
-                        <div class="text-center px-4">
-                            <span class="text-xs text-purple-200 block uppercase font-sans font-semibold">Total Family Stars</span>
-                            <span id="display-total-stars" class="text-2xl font-black text-amber-400 flex items-center justify-center gap-1">
-                                0 <i class="fa-solid fa-star text-amber-300 text-base"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- View Mode Tabs (Leaderboard vs Individual Detail) -->
-            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
-                <div class="flex space-x-2">
-                    <button onclick="switchKidsSubTab('leaderboard')" id="tab-leaderboard-btn" class="px-5 py-2.5 rounded-2xl font-bold text-sm bg-white text-purple-600 shadow-sm border border-slate-200 flex items-center space-x-2">
-                        <i class="fa-solid fa-trophy text-amber-500"></i>
-                        <span>Leaderboard</span>
-                    </button>
-                    <button onclick="switchKidsSubTab('breakdown')" id="tab-breakdown-btn" class="px-5 py-2.5 rounded-2xl font-bold text-sm text-slate-600 hover:bg-white/60 flex items-center space-x-2">
-                        <i class="fa-solid fa-child"></i>
-                        <span>Kid Task Details</span>
-                    </button>
-                </div>
-                <div id="kid-select-container" class="hidden">
-                    <select id="kid-detail-selector" onchange="renderIndividualDetail()" class="bg-white border border-slate-300 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <!-- Options generated by JS -->
-                    </select>
-                </div>
-            </div>
-
-            <!-- SUB-TAB 1: LEADERBOARD & PODIUM -->
-            <div id="subtab-leaderboard" class="space-y-6">
-                <!-- Top Podium -->
-                <div id="podium-cards" class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                    <!-- Dynamic Podium Generated by JS -->
-                </div>
-
-                <!-- Full Leaderboard Table Card -->
-                <div class="glass-card rounded-3xl p-6 shadow-lg">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-ranking-star text-amber-500"></i> Overall Standings & Daily Progress
-                    </h3>
-                    <div id="leaderboard-rows" class="space-y-3">
-                        <!-- Dynamic Rows -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- SUB-TAB 2: INDIVIDUAL TASK BREAKDOWN -->
-            <div id="subtab-breakdown" class="hidden space-y-6">
-                <div id="kid-profile-header" class="glass-card rounded-3xl p-6 shadow-lg">
-                    <!-- Kid Header Info -->
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Studies Column -->
-                    <div class="glass-card rounded-3xl p-6 shadow-lg border-t-4 border-t-blue-500">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="font-bold text-slate-800 flex items-center gap-2">
-                                <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-sm">
-                                    <i class="fa-solid fa-book-open"></i>
-                                </span>
-                                Studies & Homework
-                            </h4>
-                            <span id="study-count-badge" class="text-xs font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">0/0 Completed</span>
-                        </div>
-                        <div id="study-tasks-list" class="space-y-2.5">
-                            <!-- Tasks -->
-                        </div>
-                    </div>
-
-                    <!-- Activities Column -->
-                    <div class="glass-card rounded-3xl p-6 shadow-lg border-t-4 border-t-emerald-500">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="font-bold text-slate-800 flex items-center gap-2">
-                                <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm">
-                                    <i class="fa-solid fa-person-running"></i>
-                                </span>
-                                Activities & Chores
-                            </h4>
-                            <span id="activity-count-badge" class="text-xs font-bold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full">0/0 Completed</span>
-                        </div>
-                        <div id="activity-tasks-list" class="space-y-2.5">
-                            <!-- Tasks -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </section>
-
-        <!-- ========================================== -->
-        <!-- VIEW 2: PARENT ENTRY & MANAGEMENT PORTAL   -->
-        <!-- ========================================== -->
-        <section id="parent-view" class="hidden space-y-8">
-            
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 text-white p-6 rounded-3xl shadow-xl">
+        <!-- Top Hero Banner -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 text-white p-8 sm:p-10 shadow-2xl">
+            <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+            <div class="absolute -left-10 -top-10 w-64 h-64 bg-violet-400/20 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div>
-                    <div class="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
-                        <i class="fa-solid fa-user-shield"></i> Parent Data Entry Portal
+                    <div class="inline-flex items-center space-x-2 bg-white/15 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md mb-4 text-indigo-100 border border-white/20">
+                        <i class="fa-solid fa-bolt text-amber-300 animate-bounce"></i>
+                        <span>Live Family Performance & Leaderboard</span>
                     </div>
-                    <h2 class="text-2xl font-bold">Mark Daily Tasks & Assign Points</h2>
-                    <p class="text-slate-400 text-sm font-sans mt-0.5">Check off completed daily tasks to award star points to your kids.</p>
+                    <h2 class="font-heading font-extrabold text-3xl sm:text-5xl tracking-tight leading-tight">Welcome to Family Star Hub! ⭐</h2>
+                    <p class="text-indigo-100 mt-2.5 text-sm sm:text-base max-w-xl font-medium leading-relaxed">Complete your daily studies and helpful activities to earn stars, unlock rank levels, and win amazing rewards!</p>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <button onclick="openModal('kid-modal')" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm transition-all flex items-center gap-2 shadow-lg shadow-purple-900/40">
-                        <i class="fa-solid fa-user-plus"></i> Add Child
-                    </button>
-                    <button onclick="openModal('task-modal')" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm transition-all flex items-center gap-2 shadow-lg shadow-amber-900/40">
-                        <i class="fa-solid fa-plus-circle"></i> Add Daily Task
-                    </button>
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-5 flex items-center space-x-6 shadow-inner">
+                    <div class="text-center">
+                        <span class="block text-3xl sm:text-4xl font-extrabold font-heading text-amber-300 transition-all transform hover:scale-110" id="stats-total-stars">0</span>
+                        <span class="text-xs text-indigo-200 uppercase tracking-wider font-bold mt-0.5 block">Total Stars</span>
+                    </div>
+                    <div class="w-px h-12 bg-white/20"></div>
+                    <div class="text-center">
+                        <span class="block text-3xl sm:text-4xl font-extrabold font-heading text-emerald-300 transition-all transform hover:scale-110" id="stats-completed-today">0</span>
+                        <span class="text-xs text-indigo-200 uppercase tracking-wider font-bold mt-0.5 block">Done Today</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Podium & Leaderboard Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left 2 Cols: Leaderboard & Kids Breakdown -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-heading font-bold text-xl text-slate-900 flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm shadow-2xs">
+                            <i class="fa-solid fa-medal"></i>
+                        </div>
+                        Kids Scoreboard & Breakdown
+                    </h3>
+                    <div class="text-xs font-semibold text-slate-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Viewing: <span id="active-date-badge" class="text-indigo-600 font-bold">Today</span>
+                    </div>
+                </div>
+
+                <!-- Kids Cards Container -->
+                <div id="kids-dashboard-container" class="space-y-6">
+                    <!-- Populated dynamically -->
                 </div>
             </div>
 
-            <!-- DAILY ENTRY SCORING SHEET -->
-            <div class="glass-card rounded-3xl p-6 shadow-lg space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-800">Daily Marking Sheet</h3>
-                        <p class="text-xs text-slate-500 font-sans">Check tasks off to give stars for today or select a past date.</p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <label class="text-xs font-bold text-slate-500 uppercase font-sans">Select Date:</label>
-                        <input type="date" id="parent-entry-date" onchange="renderParentPortal()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <!-- Right Col: Podium / Top Ranker & Quick Info -->
+            <div class="space-y-6">
+                <div class="glass-panel rounded-3xl p-6 shadow-sm border border-slate-200/80">
+                    <h3 class="font-heading font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-xs shadow-2xs">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        Today's Podium Leader
+                    </h3>
+                    <div id="podium-container" class="text-center py-8 px-4 bg-gradient-to-b from-slate-50/80 to-indigo-50/40 rounded-2xl border border-indigo-100/60 shadow-inner relative overflow-hidden">
+                        <!-- Populated dynamically -->
                     </div>
                 </div>
 
-                <!-- Interactive Scoring Cards Per Kid -->
-                <div id="parent-scoring-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Populated by JS -->
+                <!-- Reward Levels Info Card -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
+                    <h3 class="font-heading font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-xs shadow-2xs">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        Badge Tiers
+                    </h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/70 transition-all hover:scale-[1.02]">
+                            <span class="font-bold text-amber-800 flex items-center gap-2.5"><i class="fa-solid fa-medal text-amber-600 text-base"></i> Bronze Explorer</span>
+                            <span class="text-xs font-bold text-amber-700 bg-amber-100/80 px-3 py-1 rounded-full shadow-2xs">0 - 49 Stars</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-100/80 border border-slate-300/70 transition-all hover:scale-[1.02]">
+                            <span class="font-bold text-slate-700 flex items-center gap-2.5"><i class="fa-solid fa-medal text-slate-500 text-base"></i> Silver Scholar</span>
+                            <span class="text-xs font-bold text-slate-600 bg-slate-200/80 px-3 py-1 rounded-full shadow-2xs">50 - 149 Stars</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-yellow-50/80 border border-yellow-200/70 transition-all hover:scale-[1.02]">
+                            <span class="font-bold text-yellow-800 flex items-center gap-2.5"><i class="fa-solid fa-award text-yellow-600 text-base"></i> Gold Champion</span>
+                            <span class="text-xs font-bold text-yellow-700 bg-yellow-100/80 px-3 py-1 rounded-full shadow-2xs">150 - 299 Stars</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200/70 transition-all hover:scale-[1.02]">
+                            <span class="font-bold text-indigo-900 flex items-center gap-2.5"><i class="fa-solid fa-gem text-indigo-600 text-base"></i> Diamond Legend</span>
+                            <span class="text-xs font-bold text-indigo-700 bg-indigo-100/80 px-3 py-1 rounded-full shadow-2xs">300+ Stars</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- MANAGEMENT PANELS (Kids & Tasks Bank) -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                <!-- Task Bank -->
-                <div class="glass-card rounded-3xl p-6 shadow-lg space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-list-check text-purple-600"></i> Active Task Bank
-                        </h4>
-                        <button onclick="openModal('task-modal')" class="text-xs font-bold text-purple-600 hover:underline">
-                            + Add New Task
-                        </button>
-                    </div>
-                    <div id="parent-task-bank" class="space-y-2.5 max-h-80 overflow-y-auto pr-1">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-
-                <!-- Kids Bank -->
-                <div class="glass-card rounded-3xl p-6 shadow-lg space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-users text-blue-600"></i> Registered Children
-                        </h4>
-                        <button onclick="openModal('kid-modal')" class="text-xs font-bold text-blue-600 hover:underline">
-                            + Add Child Profile
-                        </button>
-                    </div>
-                    <div id="parent-kids-bank" class="space-y-2.5 max-h-80 overflow-y-auto pr-1">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-
-            </div>
-
-        </section>
+        </div>
 
     </main>
 
-    <!-- ========================================== -->
-    <!-- MODALS & SECURITY GATES                     -->
-    <!-- ========================================== -->
-
-    <!-- PIN ACCESS GATE MODAL -->
-    <div id="pin-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center space-y-5">
-            <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-inner">
-                <i class="fa-solid fa-key"></i>
-            </div>
-            <div>
-                <h3 class="text-xl font-bold text-slate-800">Parent Entry PIN</h3>
-                <p class="text-xs text-slate-500 font-sans mt-1">Enter PIN to open the parent entry page (Default PIN: <strong class="text-purple-600">1234</strong>)</p>
-            </div>
-            <input type="password" id="pin-field" maxlength="4" placeholder="••••" class="w-40 text-center text-3xl font-mono tracking-widest py-2 bg-slate-100 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500">
-            <div id="pin-error-msg" class="text-xs text-red-500 font-sans hidden">Incorrect PIN. Try entering 1234.</div>
-            <div class="flex space-x-3">
-                <button onclick="closeModal('pin-modal')" class="w-1/2 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50">Cancel</button>
-                <button onclick="validatePin()" class="w-1/2 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-md shadow-purple-200">Unlock</button>
-            </div>
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-200 bg-white py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 font-medium">
+            Kids Daily Progress & Reward Hub &bull; Designed for Family Excellence with Animations
         </div>
-    </div>
+    </footer>
 
-    <!-- ADD KID MODAL -->
-    <div id="kid-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-xl font-bold text-slate-800">Add Child Profile</h3>
-                <button onclick="closeModal('kid-modal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- PIN Modal -->
+    <div id="pin-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all duration-300">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
+                    <i class="fa-solid fa-lock text-2xl animate-pulse"></i>
+                </div>
+                <h3 class="font-heading font-extrabold text-2xl text-slate-900">Parent Access PIN</h3>
+                <p class="text-xs text-slate-500 mt-1 font-medium">Enter your 4-digit PIN to access the Parent Admin Portal (Default: 1234)</p>
             </div>
-            <form onsubmit="handleSaveKid(event)" class="space-y-4">
+            <form onsubmit="verifyPin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Child Name</label>
-                    <input type="text" id="kid-name" required placeholder="e.g. Leo" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-semibold">
+                    <input type="password" id="pin-input" maxlength="4" placeholder="••••" class="w-full text-center tracking-[1em] text-3xl py-3.5 px-4 rounded-2xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-600 bg-slate-50 font-bold transition-all" autofocus required>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Choose Avatar Emoji</label>
-                    <div class="grid grid-cols-6 gap-2 text-2xl py-2">
-                        <button type="button" onclick="setAvatar('🦁')" class="avatar-opt p-2 border rounded-xl hover:bg-amber-50 text-center">🦁</button>
-                        <button type="button" onclick="setAvatar('🦄')" class="avatar-opt p-2 border rounded-xl hover:bg-amber-50 text-center">🦄</button>
-                        <button type="button" onclick="setAvatar('🚀')" class="avatar-opt p-2 border rounded-xl hover:bg-amber-50 text-center">🚀</button>
-                        <button type="button" onclick="setAvatar('🦸')" class="avatar-opt p-2 border rounded-xl hover:bg-amber-50 text-center">🦸</button>
-                        <button type="button" onclick="setAvatar('🥷')" class="avatar-opt p-2 border rounded-xl hover:bg-amber-50 text-center">🥷</button>
-                        <button type="button" onclick="setAvatar('🐉')" class="avatar-opt p-2 border rounded-xl hover:bg-amber-50 text-center">🐉</button>
-                    </div>
-                    <input type="hidden" id="selected-avatar" value="🦁">
-                </div>
+                <div id="pin-error" class="text-xs text-rose-500 font-semibold text-center hidden bg-rose-50 py-2 rounded-xl border border-rose-100">Incorrect PIN. Try '1234'.</div>
                 <div class="flex space-x-3 pt-2">
-                    <button type="button" onclick="closeModal('kid-modal')" class="w-1/2 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm">Cancel</button>
-                    <button type="submit" class="w-1/2 py-2.5 rounded-xl bg-purple-600 text-white font-bold text-sm shadow-md">Save Profile</button>
+                    <button type="button" onclick="closePinModal()" class="w-1/2 py-3.5 px-4 rounded-2xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors">Cancel</button>
+                    <button type="submit" class="w-1/2 py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 active:scale-95">Unlock Panel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ADD TASK MODAL -->
-    <div id="task-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-xl font-bold text-slate-800">Add New Daily Task</h3>
-                <button onclick="closeModal('task-modal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form onsubmit="handleSaveTask(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Task Title</label>
-                    <input type="text" id="task-title" required placeholder="e.g. Solve Math Homework" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-semibold">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Category</label>
-                        <select id="task-category" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <option value="studies">📚 Studies</option>
-                            <option value="activities">⚽ Activities & Chores</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Star Points</label>
-                        <input type="number" id="task-points" min="1" max="100" value="10" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Icon</label>
-                    <select id="task-icon" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <option value="fa-book-open">📚 Reading / Book</option>
-                        <option value="fa-pencil">✏️ Writing / Homework</option>
-                        <option value="fa-calculator">🧮 Math Practice</option>
-                        <option value="fa-broom">🧹 Cleaning / Room</option>
-                        <option value="fa-person-running">🏃 Sport / Exercise</option>
-                        <option value="fa-teeth">🪥 Brush Teeth</option>
-                        <option value="fa-music">🎵 Music Practice</option>
-                    </select>
-                </div>
-                <div class="flex space-x-3 pt-2">
-                    <button type="button" onclick="closeModal('task-modal')" class="w-1/2 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm">Cancel</button>
-                    <button type="submit" class="w-1/2 py-2.5 rounded-xl bg-purple-600 text-white font-bold text-sm shadow-md">Add Task</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- APP JAVASCRIPT ENGINE -->
-    <script>
-        const DEFAULT_PIN = "1234";
-
-        const INITIAL_KIDS = [
-            { id: "k1", name: "Alex", avatar: "🦁", totalScore: 115, streak: 4 },
-            { id: "k2", name: "Maya", avatar: "🦄", totalScore: 210, streak: 7 },
-            { id: "k3", name: "Sam", avatar: "🚀", totalScore: 80, streak: 2 }
-        ];
-
-        const INITIAL_TASKS = [
-            { id: "t1", title: "Read 15 Pages of Book", category: "studies", points: 15, icon: "fa-book-open" },
-            { id: "t2", title: "Math Worksheets", category: "studies", points: 20, icon: "fa-calculator" },
-            { id: "t3", title: "Clean & Tidy Room", category: "activities", points: 15, icon: "fa-broom" },
-            { id: "t4", title: "30 Mins Sports / Outdoor Play", category: "activities", points: 15, icon: "fa-person-running" },
-            { id: "t5", title: "Brush Teeth Morning & Night", category: "activities", points: 10, icon: "fa-teeth" }
-        ];
-
-        const getTodayStr = () => new Date().toISOString().split('T')[0];
-
-        // App State
-        let kids = [];
-        let tasks = [];
-        let logs = {}; // { "YYYY-MM-DD": { kidId: { taskId: boolean } } }
-        let currentView = 'kids';
-        let currentSubTab = 'leaderboard';
-
-        window.onload = function() {
-            initData();
-            document.getElementById('display-date').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' });
-            document.getElementById('parent-entry-date').value = getTodayStr();
-            showView('kids');
-        };
-
-        function initData() {
-            const k = localStorage.getItem('sk_v2_kids');
-            const t = localStorage.getItem('sk_v2_tasks');
-            const l = localStorage.getItem('sk_v2_logs');
-
-            kids = k ? JSON.parse(k) : INITIAL_KIDS;
-            tasks = t ? JSON.parse(t) : INITIAL_TASKS;
-            logs = l ? JSON.parse(l) : {
-                [getTodayStr()]: {
-                    "k1": { "t1": true, "t5": true },
-                    "k2": { "t1": true, "t2": true, "t3": true, "t5": true }
-                }
-            };
-            saveData();
-        }
-
-        function saveData() {
-            localStorage.setItem('sk_v2_kids', JSON.stringify(kids));
-            localStorage.setItem('sk_v2_tasks', JSON.stringify(tasks));
-            localStorage.setItem('sk_v2_logs', JSON.stringify(logs));
-        }
-
-        // View Navigation
-        function showView(view) {
-            currentView = view;
-            const kidsSec = document.getElementById('kids-view');
-            const parentSec = document.getElementById('parent-view');
-            const kidsBtn = document.getElementById('nav-kids-btn');
-            const parentBtn = document.getElementById('nav-parent-btn');
-
-            if (view === 'kids') {
-                kidsSec.classList.remove('hidden');
-                parentSec.classList.add('hidden');
-                kidsBtn.className = "px-4 py-2.5 rounded-full font-bold text-sm transition-all duration-300 flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-300";
-                parentBtn.className = "px-4 py-2.5 rounded-full font-bold text-sm text-slate-700 hover:bg-slate-100 transition-all duration-300 flex items-center space-x-2 border border-slate-300 bg-white";
-                renderKidsDashboard();
-            } else {
-                kidsSec.classList.add('hidden');
-                parentSec.classList.remove('hidden');
-                parentBtn.className = "px-4 py-2.5 rounded-full font-bold text-sm transition-all duration-300 flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-300";
-                kidsBtn.className = "px-4 py-2.5 rounded-full font-bold text-sm text-slate-700 hover:bg-slate-100 transition-all duration-300 flex items-center space-x-2 border border-slate-300 bg-white";
-                renderParentPortal();
-            }
-        }
-
-        function openParentGate() {
-            document.getElementById('pin-modal').classList.remove('hidden');
-            document.getElementById('pin-field').value = '';
-            document.getElementById('pin-error-msg').classList.add('hidden');
-            document.getElementById('pin-field').focus();
-        }
-
-        function validatePin() {
-            const inputVal = document.getElementById('pin-field').value;
-            if (inputVal === DEFAULT_PIN) {
-                closeModal('pin-modal');
-                showView('parent');
-            } else {
-                document.getElementById('pin-error-msg').classList.remove('hidden');
-            }
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        // Sub-tabs in Kids View
-        function switchKidsSubTab(sub) {
-            currentSubTab = sub;
-            const lbBtn = document.getElementById('tab-leaderboard-btn');
-            const bkBtn = document.getElementById('tab-breakdown-btn');
-            const lbSec = document.getElementById('subtab-leaderboard');
-            const bkSec = document.getElementById('subtab-breakdown');
-            const selectWrap = document.getElementById('kid-select-container');
-
-            if (sub === 'leaderboard') {
-                lbBtn.className = "px-5 py-2.5 rounded-2xl font-bold text-sm bg-white text-purple-600 shadow-sm border border-slate-200 flex items-center space-x-2";
-                bkBtn.className = "px-5 py-2.5 rounded-2xl font-bold text-sm text-slate-600 hover:bg-white/60 flex items-center space-x-2";
-                lbSec.classList.remove('hidden');
-                bkSec.classList.add('hidden');
-                selectWrap.classList.add('hidden');
-            } else {
-                bkBtn.className = "px-5 py-2.5 rounded-2xl font-bold text-sm bg-white text-purple-600 shadow-sm border border-slate-200 flex items-center space-x-2";
-                lbBtn.className = "px-5 py-2.5 rounded-2xl font-bold text-sm text-slate-600 hover:bg-white/60 flex items-center space-x-2";
-                bkSec.classList.remove('hidden');
-                lbSec.classList.add('hidden');
-                selectWrap.classList.remove('hidden');
-            }
-            renderKidsDashboard();
-        }
-
-        // Render Kids Public View
-        function renderKidsDashboard() {
-            const sorted = [...kids].sort((a, b) => b.totalScore - a.totalScore);
-            const totalFamily = kids.reduce((acc, k) => acc + k.totalScore, 0);
-            document.getElementById('display-total-stars').innerHTML = `${totalFamily} <i class="fa-solid fa-star text-amber-300"></i>`;
-
-            // Podium
-            const podiumElem = document.getElementById('podium-cards');
-            podiumElem.innerHTML = '';
-            const top3 = sorted.slice(0, 3);
-            
-            let podiumArr = [];
-            if (top3.length >= 2) podiumArr.push({ kid: top3[1], rank: 2 });
-            if (top3.length >= 1) podiumArr.push({ kid: top3[0], rank: 1 });
-            if (top3.length >= 3) podiumArr.push({ kid: top3[2], rank: 3 });
-
-            podiumArr.forEach(item => {
-                const k = item.kid;
-                const is1st = item.rank === 1;
-                const badgeColor = is1st ? 'bg-amber-400 text-slate-900' : (item.rank === 2 ? 'bg-slate-300 text-slate-800' : 'bg-amber-700 text-white');
-
-                podiumElem.innerHTML += `
-                    <div class="glass-card rounded-3xl p-6 text-center relative bouncy ${is1st ? 'md:-translate-y-4 border-2 border-amber-300 shadow-amber-200/50 shadow-xl' : 'shadow-lg'}">
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 ${badgeColor} text-[11px] font-black uppercase px-3 py-0.5 rounded-full shadow">
-                            ${item.rank === 1 ? '👑 1st Rank' : item.rank === 2 ? '🥈 2nd Rank' : '🥉 3rd Rank'}
+    <!-- Parent Admin Portal Modal / Full Overlay -->
+    <div id="parent-admin-modal" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md hidden overflow-y-auto transition-all duration-300">
+        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+            <div class="bg-white rounded-3xl max-w-5xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative my-auto animate-in fade-in zoom-in-95 duration-200">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between pb-6 border-b border-slate-200 mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30">
+                            <i class="fa-solid fa-sliders text-xl"></i>
                         </div>
-                        <div class="text-6xl my-3">${k.avatar}</div>
-                        <h4 class="text-xl font-bold text-slate-800">${k.name}</h4>
-                        <div class="mt-2 text-2xl font-black text-amber-500 flex items-center justify-center gap-1">
-                            ${k.totalScore} <i class="fa-solid fa-star text-amber-400 text-lg"></i>
-                        </div>
-                        <div class="mt-2 inline-flex items-center space-x-1 bg-amber-50 text-amber-700 text-xs px-3 py-1 rounded-full font-bold">
-                            <i class="fa-solid fa-fire text-orange-500"></i>
-                            <span>${k.streak || 0} Day Streak</span>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Rows
-            const rowsElem = document.getElementById('leaderboard-rows');
-            rowsElem.innerHTML = '';
-            sorted.forEach((k, idx) => {
-                const todayDone = countCompleted(k.id, getTodayStr());
-                rowsElem.innerHTML += `
-                    <div class="flex items-center justify-between p-4 bg-white/80 rounded-2xl border border-slate-100 shadow-sm">
-                        <div class="flex items-center space-x-4">
-                            <span class="font-black text-lg w-6 text-center ${idx < 3 ? 'text-amber-500' : 'text-slate-400'}">#${idx + 1}</span>
-                            <span class="text-3xl">${k.avatar}</span>
-                            <div>
-                                <h5 class="font-bold text-slate-800 text-base">${k.name}</h5>
-                                <p class="text-xs text-slate-500 font-sans">${todayDone} tasks done today</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-xl font-black text-amber-500 flex items-center justify-end gap-1">
-                                ${k.totalScore} <i class="fa-solid fa-star text-amber-400 text-sm"></i>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Populate selector for individual subtab
-            const selector = document.getElementById('kid-detail-selector');
-            const activeSel = selector.value;
-            selector.innerHTML = '';
-            kids.forEach(k => {
-                selector.innerHTML += `<option value="${k.id}">${k.avatar} ${k.name}</option>`;
-            });
-            if (activeSel && kids.some(k => k.id === activeSel)) selector.value = activeSel;
-
-            if (kids.length > 0) renderIndividualDetail();
-        }
-
-        function renderIndividualDetail() {
-            const kidId = document.getElementById('kid-detail-selector').value || (kids[0] && kids[0].id);
-            const kid = kids.find(k => k.id === kidId);
-            if (!kid) return;
-
-            const today = getTodayStr();
-            const kidLogs = (logs[today] && logs[today][kid.id]) ? logs[today][kid.id] : {};
-
-            document.getElementById('kid-profile-header').innerHTML = `
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-5xl p-3 bg-amber-100 rounded-2xl">${kid.avatar}</span>
                         <div>
-                            <h3 class="text-2xl font-bold text-slate-800">${kid.name}'s Progress</h3>
-                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mt-1">
-                                <i class="fa-solid fa-fire text-orange-500"></i> ${kid.streak || 0} Day Streak
-                            </span>
+                            <h3 class="font-heading font-extrabold text-xl text-slate-900">Parent Admin Portal</h3>
+                            <p class="text-xs text-slate-500 font-medium">Manage daily tasks, mark completions, and configure kids</p>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <span class="text-xs text-slate-500 font-bold uppercase font-sans">Current Stars</span>
-                        <div class="text-3xl font-black text-amber-500 flex items-center justify-end gap-1">
-                            ${kid.totalScore} <i class="fa-solid fa-star text-amber-400 text-xl"></i>
+                    <button onclick="closeParentModal()" class="w-11 h-11 rounded-2xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors active:scale-95">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Admin Tabs -->
+                <div class="flex border-b border-slate-200 mb-6 space-x-8">
+                    <button onclick="switchAdminTab('scoring')" id="admin-tab-scoring" class="pb-3 text-sm tab-active transition-all flex items-center gap-2 font-bold">
+                        <i class="fa-regular fa-square-check text-base"></i> Daily Scorecard & Marking
+                    </button>
+                    <button onclick="switchAdminTab('management')" id="admin-tab-management" class="pb-3 text-sm tab-inactive transition-all flex items-center gap-2 font-bold">
+                        <i class="fa-solid fa-users-gear text-base"></i> Manage Kids & Tasks
+                    </button>
+                </div>
+
+                <!-- Tab 1: Scoring & Marking -->
+                <div id="admin-content-scoring" class="space-y-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80">
+                        <div class="flex items-center space-x-3">
+                            <label for="admin-date-picker" class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                <i class="fa-regular fa-calendar text-indigo-600"></i> Select Date:
+                            </label>
+                            <input type="date" id="admin-date-picker" onchange="onAdminDateChange(this.value)" class="bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs">
+                        </div>
+                        <div class="text-xs text-indigo-700 font-medium bg-indigo-50/80 px-3.5 py-2 rounded-xl border border-indigo-100 flex items-center">
+                            <i class="fa-solid fa-circle-info mr-1.5 text-indigo-500"></i> Check tasks completed for the selected date. Changes save instantly!
+                        </div>
+                    </div>
+
+                    <!-- Kids Scoring List -->
+                    <div id="admin-scoring-container" class="space-y-6">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Tab 2: Manage Kids & Tasks -->
+                <div id="admin-content-management" class="space-y-8 hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Kids Management -->
+                        <div class="space-y-4 bg-slate-50/80 p-6 rounded-3xl border border-slate-200/80">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-heading font-bold text-base text-slate-900 flex items-center gap-2">
+                                    <i class="fa-solid fa-child text-indigo-600"></i> Children Profiles
+                                </h4>
+                            </div>
+                            <form onsubmit="addKid(event)" class="flex gap-2.5">
+                                <input type="text" id="new-kid-name" placeholder="Kid's Name" class="flex-grow bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-medium" required>
+                                <select id="new-kid-avatar" class="bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-semibold">
+                                    <option value="🦁">🦁 Lion</option>
+                                    <option value="🦄">🦄 Unicorn</option>
+                                    <option value="🚀">🚀 Rocket</option>
+                                    <option value="🐼">🐼 Panda</option>
+                                    <option value="🐯">🐯 Tiger</option>
+                                    <option value="🦊">🦊 Fox</option>
+                                    <option value="🦖">🦖 Dino</option>
+                                </select>
+                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-md shadow-indigo-600/25 active:scale-95">Add</button>
+                            </form>
+                            <div id="admin-kids-list" class="space-y-2.5 mt-4">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Tasks Management -->
+                        <div class="space-y-4 bg-slate-50/80 p-6 rounded-3xl border border-slate-200/80">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-heading font-bold text-base text-slate-900 flex items-center gap-2">
+                                    <i class="fa-solid fa-list-check text-indigo-600"></i> Daily Task Library
+                                </h4>
+                            </div>
+                            <form onsubmit="addTask(event)" class="space-y-3">
+                                <input type="text" id="new-task-name" placeholder="Task Name (e.g. Read 20 mins)" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-medium" required>
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <select id="new-task-category" class="bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-semibold">
+                                        <option value="studies">📚 Studies & Homework</option>
+                                        <option value="activities">🌟 Activities & Chores</option>
+                                    </select>
+                                    <input type="number" id="new-task-stars" placeholder="Stars (e.g. 10)" min="1" max="50" class="bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-semibold" required>
+                                </div>
+                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-sm font-semibold transition-all shadow-md shadow-indigo-600/25 active:scale-95">Add Task</button>
+                            </form>
+                            <div id="admin-tasks-list" class="space-y-2.5 mt-4 max-h-52 overflow-y-auto pr-1">
+                                <!-- Populated dynamically -->
+                            </div>
                         </div>
                     </div>
                 </div>
-            `;
 
-            const studyTasks = tasks.filter(t => t.category === 'studies');
-            const actTasks = tasks.filter(t => t.category === 'activities');
+                <!-- Modal Footer -->
+                <div class="pt-6 border-t border-slate-200 mt-6 flex justify-end">
+                    <button onclick="closeParentModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-7 py-3 rounded-2xl text-sm font-semibold transition-all shadow-md active:scale-95">Done / Exit Portal</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            renderTaskList('study-tasks-list', 'study-count-badge', studyTasks, kidLogs);
-            renderTaskList('activity-tasks-list', 'activity-count-badge', actTasks, kidLogs);
+    <!-- Application Script -->
+    <script>
+        const DEFAULT_KIDS = [
+            { id: 'kid_1', name: 'Alex', avatar: '🦁' },
+            { id: 'kid_2', name: 'Maya', avatar: '🦄' },
+            { id: 'kid_3', name: 'Sam', avatar: '🚀' }
+        ];
+
+        const DEFAULT_TASKS = [
+            { id: 'task_1', name: 'Quran / Islamic Studies 20m', category: 'studies', stars: 10 },
+            { id: 'task_2', name: 'School Homework & Math Practice', category: 'studies', stars: 15 },
+            { id: 'task_3', name: 'English Reading & Vocabulary', category: 'studies', stars: 10 },
+            { id: 'task_4', name: 'Clean Room & Organize Desk', category: 'activities', stars: 10 },
+            { id: 'task_5', name: 'Physical Exercise / Sports 30m', category: 'activities', stars: 15 },
+            { id: 'task_6', name: 'Help Parents with Chores', category: 'activities', stars: 10 }
+        ];
+
+        function getStoredData(key, fallback) {
+            const data = localStorage.getItem('kids_hub_' + key);
+            return data ? JSON.parse(data) : fallback;
         }
 
-        function renderTaskList(containerId, badgeId, taskArr, kidLogs) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            let completed = 0;
-
-            taskArr.forEach(t => {
-                const isDone = !!kidLogs[t.id];
-                if (isDone) completed++;
-
-                container.innerHTML += `
-                    <div class="p-3 rounded-2xl border flex items-center justify-between ${isDone ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-white border-slate-100 text-slate-700'}">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 rounded-xl ${isDone ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'} flex items-center justify-center text-xs">
-                                <i class="fa-solid ${t.icon || 'fa-star'}"></i>
-                            </div>
-                            <div>
-                                <h5 class="font-bold text-sm ${isDone ? 'line-through opacity-70' : ''}">${t.title}</h5>
-                                <span class="text-xs font-bold text-amber-500">+${t.points} Stars</span>
-                            </div>
-                        </div>
-                        <div class="w-6 h-6 rounded-full flex items-center justify-center ${isDone ? 'bg-emerald-500 text-white' : 'border-2 border-slate-300'}">
-                            ${isDone ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
-                        </div>
-                    </div>
-                `;
-            });
-
-            document.getElementById(badgeId).innerText = `${completed}/${taskArr.length} Completed`;
+        function setStoredData(key, value) {
+            localStorage.setItem('kids_hub_' + key, JSON.stringify(value));
         }
 
-        function countCompleted(kidId, dateStr) {
-            if (!logs[dateStr] || !logs[dateStr][kidId]) return 0;
-            return Object.values(logs[dateStr][kidId]).filter(Boolean).length;
+        let kids = getStoredData('kids', DEFAULT_KIDS);
+        let tasks = getStoredData('tasks', DEFAULT_TASKS);
+        let records = getStoredData('records', {});
+
+        function getTodayString() {
+            const d = new Date();
+            return d.toISOString().split('T')[0];
         }
 
-        // Render Parent Entry Portal
-        function renderParentPortal() {
-            const container = document.getElementById('parent-scoring-grid');
-            container.innerHTML = '';
-            const activeDate = document.getElementById('parent-entry-date').value || getTodayStr();
+        let activeDate = getTodayString();
 
-            if (kids.length === 0) {
-                container.innerHTML = `<p class="col-span-full text-center py-6 text-slate-400 font-bold">No kids added yet. Click "+ Add Child" above!</p>`;
+        function getBadgeInfo(totalStars) {
+            if (totalStars >= 300) return { name: 'Diamond Legend', icon: 'fa-gem', color: 'bg-indigo-100/90 text-indigo-900 border-indigo-300', badgeColor: 'text-indigo-600' };
+            if (totalStars >= 150) return { name: 'Gold Champion', icon: 'fa-award', color: 'bg-amber-100/90 text-amber-900 border-amber-300', badgeColor: 'text-amber-600' };
+            if (totalStars >= 50) return { name: 'Silver Scholar', icon: 'fa-medal', color: 'bg-slate-200/90 text-slate-800 border-slate-300', badgeColor: 'text-slate-600' };
+            return { name: 'Bronze Explorer', icon: 'fa-medal', color: 'bg-amber-50/90 text-amber-900 border-amber-200', badgeColor: 'text-amber-700' };
+        }
+
+        function getKidTotalStars(kidId) {
+            let total = 0;
+            for (let dateKey in records) {
+                if (records[dateKey][kidId]) {
+                    for (let taskId in records[dateKey][kidId]) {
+                        if (records[dateKey][kidId][taskId]) {
+                            const taskObj = tasks.find(t => t.id === taskId);
+                            if (taskObj) total += taskObj.stars;
+                        }
+                    }
+                }
             }
+            return total;
+        }
+
+        function getKidDateStars(kidId, dateStr) {
+            let total = 0;
+            if (records[dateStr] && records[dateStr][kidId]) {
+                for (let taskId in records[dateStr][kidId]) {
+                    if (records[dateStr][kidId][taskId]) {
+                        const taskObj = tasks.find(t => t.id === taskId);
+                        if (taskObj) total += taskObj.stars;
+                    }
+                }
+            }
+            return total;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('header-date-text').innerText = new Date().toLocaleDateString('en-US', options);
+            document.getElementById('admin-date-picker').value = activeDate;
+            renderDashboard();
+        });
+
+        function renderDashboard() {
+            document.getElementById('active-date-badge').innerText = activeDate === getTodayString() ? 'Today (' + activeDate + ')' : activeDate;
+
+            let grandTotalStars = 0;
+            let todayCompletedCount = 0;
 
             kids.forEach(kid => {
-                const kidDateLogs = (logs[activeDate] && logs[activeDate][kid.id]) ? logs[activeDate][kid.id] : {};
+                grandTotalStars += getKidTotalStars(kid.id);
+                if (records[activeDate] && records[activeDate][kid.id]) {
+                    Object.values(records[activeDate][kid.id]).forEach(val => {
+                        if (val) todayCompletedCount++;
+                    });
+                }
+            });
 
-                let taskCheckboxes = '';
-                tasks.forEach(t => {
-                    const checked = !!kidDateLogs[t.id];
-                    taskCheckboxes += `
-                        <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
-                            <div class="flex items-center space-x-3">
-                                <input type="checkbox" onchange="toggleTask('${kid.id}', '${t.id}', '${activeDate}', this.checked)" ${checked ? 'checked' : ''} class="w-5 h-5 accent-purple-600 rounded cursor-pointer">
+            document.getElementById('stats-total-stars').innerText = grandTotalStars;
+            document.getElementById('stats-completed-today').innerText = todayCompletedCount;
+
+            const rankedKids = [...kids].map(kid => {
+                const dateStars = getKidDateStars(kid.id, activeDate);
+                const totalStars = getKidTotalStars(kid.id);
+                const badge = getBadgeInfo(totalStars);
+                return { ...kid, dateStars, totalStars, badge };
+            }).sort((a, b) => b.dateStars - a.dateStars || b.totalStars - a.totalStars);
+
+            const podiumEl = document.getElementById('podium-container');
+            if (rankedKids.length === 0) {
+                podiumEl.innerHTML = `<p class="text-xs text-slate-500">No kids added yet. Use Parent Admin to add kids.</p>`;
+            } else {
+                const topKid = rankedKids[0];
+                podiumEl.innerHTML = `
+                    <div class="relative inline-block mb-3 animate-float">
+                        <span class="text-5xl">${topKid.avatar}</span>
+                        <span class="absolute -top-2.5 -right-2.5 bg-amber-400 text-slate-900 rounded-full w-7 h-7 flex items-center justify-center text-xs font-black shadow-lg animate-bounce"><i class="fa-solid fa-crown text-xs"></i></span>
+                    </div>
+                    <h4 class="font-heading font-extrabold text-xl text-slate-900">${topKid.name}</h4>
+                    <p class="text-xs font-bold text-indigo-600 mt-1">${topKid.dateStars} Stars Today (${topKid.totalStars} Total)</p>
+                    <div class="mt-3.5 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border ${topKid.badge.color} shadow-2xs">
+                        <i class="fa-solid ${topKid.badge.icon} ${topKid.badge.badgeColor}"></i> ${topKid.badge.name}
+                    </div>
+                `;
+            }
+
+            const container = document.getElementById('kids-dashboard-container');
+            if (kids.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-8 text-center border border-slate-200">
+                        <p class="text-slate-500 text-sm font-medium">No children profiles found. Click <strong>Parent Admin</strong> above to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            rankedKids.forEach((kid, index) => {
+                const studiesTasks = tasks.filter(t => t.category === 'studies');
+                const activitiesTasks = tasks.filter(t => t.category === 'activities');
+
+                let studiesCompleted = 0;
+                studiesTasks.forEach(t => {
+                    if (records[activeDate] && records[activeDate][kid.id] && records[activeDate][kid.id][t.id]) studiesCompleted++;
+                });
+
+                let activitiesCompleted = 0;
+                activitiesTasks.forEach(t => {
+                    if (records[activeDate] && records[activeDate][kid.id] && records[activeDate][kid.id][t.id]) activitiesCompleted++;
+                });
+
+                const studiesPercent = studiesTasks.length ? Math.round((studiesCompleted / studiesTasks.length) * 100) : 0;
+                const activitiesPercent = activitiesTasks.length ? Math.round((activitiesCompleted / activitiesTasks.length) * 100) : 0;
+
+                let rankBadge = '';
+                if (index === 0) rankBadge = `<span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs"><i class="fa-solid fa-trophy text-amber-500"></i> 1st Place</span>`;
+                else if (index === 1) rankBadge = `<span class="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs"><i class="fa-solid fa-medal text-slate-500"></i> 2nd Place</span>`;
+                else if (index === 2) rankBadge = `<span class="bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs"><i class="fa-solid fa-medal text-amber-700"></i> 3rd Place</span>`;
+
+                html += `
+                    <div class="glass-panel rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-200/80 hover:shadow-xl transition-all duration-300">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-50 to-violet-100 flex items-center justify-center text-4xl shadow-inner border border-indigo-100 animate-float">
+                                    ${kid.avatar}
+                                </div>
                                 <div>
-                                    <span class="text-sm font-bold text-slate-800 ${checked ? 'line-through text-slate-400' : ''}">${t.title}</span>
-                                    <span class="text-[10px] text-purple-600 font-bold block uppercase font-sans">${t.category}</span>
+                                    <div class="flex items-center flex-wrap gap-3">
+                                        <h4 class="font-heading font-extrabold text-2xl text-slate-900">${kid.name}</h4>
+                                        ${rankBadge}
+                                    </div>
+                                    <div class="flex items-center gap-2.5 mt-1.5">
+                                        <span class="text-xs font-semibold px-3 py-1 rounded-full border ${kid.badge.color} shadow-2xs flex items-center gap-1.5">
+                                            <i class="fa-solid ${kid.badge.icon} ${kid.badge.badgeColor}"></i> ${kid.badge.name}
+                                        </span>
+                                        <span class="text-xs text-slate-500 font-medium">Total: <strong class="text-indigo-600 font-bold">${kid.totalStars} Stars</strong></span>
+                                    </div>
                                 </div>
                             </div>
-                            <span class="text-xs font-bold px-2 py-0.5 bg-amber-50 text-amber-700 rounded-md border border-amber-200">+${t.points} pts</span>
+                            <div class="bg-indigo-50/80 border border-indigo-100 px-5 py-3 rounded-2xl text-center shadow-inner">
+                                <span class="block text-2xl font-extrabold font-heading text-indigo-700">${kid.dateStars}</span>
+                                <span class="text-[10px] uppercase font-extrabold text-indigo-500 tracking-wider">Stars Today</span>
+                            </div>
+                        </div>
+
+                        <!-- Progress Breakdowns -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+                            <!-- Studies Progress -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-xs font-bold">
+                                    <span class="text-slate-700 flex items-center gap-1.5"><i class="fa-solid fa-book-open text-indigo-600"></i> Studies & Homework</span>
+                                    <span class="text-indigo-600">${studiesCompleted}/${studiesTasks.length} (${studiesPercent}%)</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200/80 p-0.5 shadow-inner">
+                                    <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 h-full rounded-full transition-all duration-700 ease-out" style="width: ${studiesPercent}%"></div>
+                                </div>
+                            </div>
+                            <!-- Activities Progress -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-xs font-bold">
+                                    <span class="text-slate-700 flex items-center gap-1.5"><i class="fa-solid fa-star text-amber-500"></i> Activities & Chores</span>
+                                    <span class="text-amber-600">${activitiesCompleted}/${activitiesTasks.length} (${activitiesPercent}%)</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200/80 p-0.5 shadow-inner">
+                                    <div class="bg-gradient-to-r from-amber-400 to-amber-500 h-full rounded-full transition-all duration-700 ease-out" style="width: ${activitiesPercent}%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Task Details Chips -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 mt-6 border-t border-slate-100">
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">Studies Tasks</h5>
+                                <div class="space-y-2">
+                                    ${studiesTasks.length === 0 ? '<p class="text-xs text-slate-400 italic">No studies tasks added.</p>' : studiesTasks.map(t => {
+                                        const done = records[activeDate] && records[activeDate][kid.id] && records[activeDate][kid.id][t.id];
+                                        return `
+                                            <div class="flex items-center justify-between text-xs p-2.5 rounded-xl border transition-all ${done ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900 font-bold shadow-2xs' : 'bg-slate-50/80 border-slate-200/80 text-slate-600'}">
+                                                <span class="truncate pr-2">${t.name}</span>
+                                                <span class="flex items-center gap-1.5 shrink-0">
+                                                    <span class="text-[10px] bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-2xs font-bold text-indigo-600">+${t.stars}⭐</span>
+                                                    ${done ? '<i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>' : '<i class="fa-regular fa-circle text-slate-300 text-sm"></i>'}
+                                                </span>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">Activities Tasks</h5>
+                                <div class="space-y-2">
+                                    ${activitiesTasks.length === 0 ? '<p class="text-xs text-slate-400 italic">No activities tasks added.</p>' : activitiesTasks.map(t => {
+                                        const done = records[activeDate] && records[activeDate][kid.id] && records[activeDate][kid.id][t.id];
+                                        return `
+                                            <div class="flex items-center justify-between text-xs p-2.5 rounded-xl border transition-all ${done ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900 font-bold shadow-2xs' : 'bg-slate-50/80 border-slate-200/80 text-slate-600'}">
+                                                <span class="truncate pr-2">${t.name}</span>
+                                                <span class="flex items-center gap-1.5 shrink-0">
+                                                    <span class="text-[10px] bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-2xs font-bold text-amber-600">+${t.stars}⭐</span>
+                                                    ${done ? '<i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>' : '<i class="fa-regular fa-circle text-slate-300 text-sm"></i>'}
+                                                </span>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function openParentModal() {
+            document.getElementById('pin-modal').classList.remove('hidden');
+            document.getElementById('pin-input').value = '';
+            document.getElementById('pin-error').classList.add('hidden');
+            setTimeout(() => document.getElementById('pin-input').focus(), 100);
+        }
+
+        function closePinModal() {
+            document.getElementById('pin-modal').classList.add('hidden');
+        }
+
+        function verifyPin(e) {
+            e.preventDefault();
+            const pin = document.getElementById('pin-input').value;
+            if (pin === '1234') {
+                closePinModal();
+                document.getElementById('parent-admin-modal').classList.remove('hidden');
+                renderAdminPortal();
+            } else {
+                document.getElementById('pin-error').classList.remove('hidden');
+            }
+        }
+
+        function closeParentModal() {
+            document.getElementById('parent-admin-modal').classList.add('hidden');
+            renderDashboard();
+        }
+
+        function switchAdminTab(tab) {
+            const scoringTab = document.getElementById('admin-tab-scoring');
+            const managementTab = document.getElementById('admin-tab-management');
+            const scoringContent = document.getElementById('admin-content-scoring');
+            const managementContent = document.getElementById('admin-content-management');
+
+            if (tab === 'scoring') {
+                scoringTab.className = 'pb-3 text-sm tab-active transition-all flex items-center gap-2 font-bold';
+                managementTab.className = 'pb-3 text-sm tab-inactive transition-all flex items-center gap-2 font-bold';
+                scoringContent.classList.remove('hidden');
+                managementContent.classList.add('hidden');
+                renderAdminScoring();
+            } else {
+                managementTab.className = 'pb-3 text-sm tab-active transition-all flex items-center gap-2 font-bold';
+                scoringTab.className = 'pb-3 text-sm tab-inactive transition-all flex items-center gap-2 font-bold';
+                managementContent.classList.remove('hidden');
+                scoringContent.classList.add('hidden');
+                renderAdminManagement();
+            }
+        }
+
+        function renderAdminPortal() {
+            document.getElementById('admin-date-picker').value = activeDate;
+            renderAdminScoring();
+            renderAdminManagement();
+        }
+
+        function onAdminDateChange(val) {
+            if (val) {
+                activeDate = val;
+                renderAdminScoring();
+            }
+        }
+
+        function renderAdminScoring() {
+            const container = document.getElementById('admin-scoring-container');
+            if (kids.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No kids added yet. Go to 'Manage Kids & Tasks' to add kids.</p>`;
+                return;
+            }
+
+            let html = '';
+            kids.forEach(kid => {
+                html += `
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-3xl">${kid.avatar}</span>
+                                <h4 class="font-heading font-extrabold text-lg text-slate-900">${kid.name}</h4>
+                            </div>
+                            <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3.5 py-1.5 rounded-xl border border-indigo-100 shadow-2xs">
+                                Total Stars: ${getKidTotalStars(kid.id)} ⭐
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                `;
+
+                tasks.forEach(task => {
+                    const checked = records[activeDate] && records[activeDate][kid.id] && records[activeDate][kid.id][task.id];
+                    html += `
+                        <label class="flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all duration-200 ${checked ? 'bg-indigo-50/70 border-indigo-300 text-indigo-950 font-bold shadow-2xs scale-[1.01]' : 'bg-slate-50/80 border-slate-200/80 text-slate-700 hover:bg-slate-100'}">
+                            <div class="flex items-center space-x-3 truncate">
+                                <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleTaskRecord('${kid.id}', '${task.id}', this.checked)" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 shrink-0">
+                                <span class="text-xs truncate">${task.name}</span>
+                            </div>
+                            <span class="text-[11px] font-extrabold text-indigo-600 bg-white px-2 py-0.5 rounded-md border border-slate-200 shrink-0 ml-2 shadow-2xs">+${task.stars}⭐</span>
                         </label>
                     `;
                 });
 
-                container.innerHTML += `
-                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-                        <div class="flex items-center justify-between border-b pb-3 border-slate-100">
-                            <div class="flex items-center space-x-3">
-                                <span class="text-3xl">${kid.avatar}</span>
-                                <div>
-                                    <h4 class="font-bold text-slate-800 text-lg">${kid.name}</h4>
-                                    <p class="text-xs text-slate-500 font-sans font-medium">Total: ${kid.totalScore} pts</p>
-                                </div>
-                            </div>
-                            <button onclick="triggerConfetti()" class="px-3 py-1 bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-xl font-bold text-xs flex items-center gap-1">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> Celebrate
-                            </button>
-                        </div>
-                        <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
-                            ${taskCheckboxes || '<p class="text-xs text-slate-400">No tasks created yet.</p>'}
+                html += `
                         </div>
                     </div>
                 `;
             });
-
-            renderParentTaskBank();
-            renderParentKidsBank();
+            container.innerHTML = html;
         }
 
-        function renderParentTaskBank() {
-            const elem = document.getElementById('parent-task-bank');
-            elem.innerHTML = '';
-            tasks.forEach(t => {
-                elem.innerHTML += `
-                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 rounded-lg bg-white border flex items-center justify-center text-xs text-slate-600">
-                                <i class="fa-solid ${t.icon || 'fa-star'}"></i>
-                            </div>
-                            <div>
-                                <h6 class="font-bold text-slate-800 text-xs">${t.title}</h6>
-                                <span class="text-[10px] text-slate-500 font-sans uppercase font-bold">${t.category} • ${t.points} pts</span>
-                            </div>
-                        </div>
-                        <button onclick="removeTask('${t.id}')" class="text-red-400 hover:text-red-600 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                `;
-            });
+        function toggleTaskRecord(kidId, taskId, isChecked) {
+            if (!records[activeDate]) {
+                records[activeDate] = {};
+            }
+            if (!records[activeDate][kidId]) {
+                records[activeDate][kidId] = {};
+            }
+            records[activeDate][kidId][taskId] = isChecked;
+            setStoredData('records', records);
+            renderAdminScoring();
+
+            if (isChecked) {
+                confetti({
+                    particleCount: 50,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899']
+                });
+            }
         }
 
-        function renderParentKidsBank() {
-            const elem = document.getElementById('parent-kids-bank');
-            elem.innerHTML = '';
-            kids.forEach(k => {
-                elem.innerHTML += `
-                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+        function renderAdminManagement() {
+            const kidsListEl = document.getElementById('admin-kids-list');
+            if (kids.length === 0) {
+                kidsListEl.innerHTML = `<p class="text-xs text-slate-400">No kids added yet.</p>`;
+            } else {
+                kidsListEl.innerHTML = kids.map(k => `
+                    <div class="flex items-center justify-between bg-white p-3.5 rounded-2xl border border-slate-200/80 text-sm shadow-2xs">
                         <div class="flex items-center space-x-3">
                             <span class="text-2xl">${k.avatar}</span>
-                            <div>
-                                <h6 class="font-bold text-slate-800 text-xs">${k.name}</h6>
-                                <span class="text-[10px] text-slate-500 font-sans font-bold">${k.totalScore} pts</span>
-                            </div>
+                            <span class="font-bold text-slate-800">${k.name}</span>
                         </div>
-                        <button onclick="removeKid('${k.id}')" class="text-red-400 hover:text-red-600 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="deleteKid('${k.id}')" class="text-slate-400 hover:text-rose-600 transition-colors p-2 rounded-xl hover:bg-rose-50"><i class="fa-solid fa-trash-can text-xs"></i></button>
                     </div>
-                `;
-            });
-        }
-
-        // Parent Actions
-        function toggleTask(kidId, taskId, dateStr, isChecked) {
-            if (!logs[dateStr]) logs[dateStr] = {};
-            if (!logs[dateStr][kidId]) logs[dateStr][kidId] = {};
-
-            const wasChecked = !!logs[dateStr][kidId][taskId];
-            logs[dateStr][kidId][taskId] = isChecked;
-
-            const tObj = tasks.find(t => t.id === taskId);
-            const kObj = kids.find(k => k.id === kidId);
-
-            if (tObj && kObj) {
-                if (isChecked && !wasChecked) {
-                    kObj.totalScore += tObj.points;
-                    triggerConfetti();
-                } else if (!isChecked && wasChecked) {
-                    kObj.totalScore = Math.max(0, kObj.totalScore - tObj.points);
-                }
+                `).join('');
             }
 
-            saveData();
-            renderParentPortal();
+            const tasksListEl = document.getElementById('admin-tasks-list');
+            if (tasks.length === 0) {
+                tasksListEl.innerHTML = `<p class="text-xs text-slate-400">No tasks added yet.</p>`;
+            } else {
+                tasksListEl.innerHTML = tasks.map(t => `
+                    <div class="flex items-center justify-between bg-white p-3.5 rounded-2xl border border-slate-200/80 text-xs shadow-2xs">
+                        <div>
+                            <span class="font-bold text-slate-800 block text-sm">${t.name}</span>
+                            <span class="text-[10px] text-slate-500 uppercase font-extrabold">${t.category} &bull; +${t.stars} Stars</span>
+                        </div>
+                        <button onclick="deleteTask('${t.id}')" class="text-slate-400 hover:text-rose-600 transition-colors p-2 rounded-xl hover:bg-rose-50"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    </div>
+                `).join('');
+            }
         }
 
-        function setAvatar(emoji) {
-            document.getElementById('selected-avatar').value = emoji;
-        }
-
-        function handleSaveKid(e) {
+        function addKid(e) {
             e.preventDefault();
-            const name = document.getElementById('kid-name').value.trim();
-            const avatar = document.getElementById('selected-avatar').value || '🦁';
+            const nameInput = document.getElementById('new-kid-name');
+            const avatarInput = document.getElementById('new-kid-avatar');
+            const name = nameInput.value.trim();
+            const avatar = avatarInput.value;
 
-            if (!name) return;
-            kids.push({ id: 'k_' + Date.now(), name, avatar, totalScore: 0, streak: 1 });
-            saveData();
-            closeModal('kid-modal');
-            renderParentPortal();
+            if (name) {
+                const newKid = { id: 'kid_' + Date.now(), name, avatar };
+                kids.push(newKid);
+                setStoredData('kids', kids);
+                nameInput.value = '';
+                renderAdminManagement();
+            }
         }
 
-        function handleSaveTask(e) {
-            e.preventDefault();
-            const title = document.getElementById('task-title').value.trim();
-            const category = document.getElementById('task-category').value;
-            const points = parseInt(document.getElementById('task-points').value, 10) || 10;
-            const icon = document.getElementById('task-icon').value;
-
-            if (!title) return;
-            tasks.push({ id: 't_' + Date.now(), title, category, points, icon });
-            saveData();
-            closeModal('task-modal');
-            renderParentPortal();
-        }
-
-        function removeKid(id) {
-            if (confirm("Remove this child profile?")) {
+        function deleteKid(id) {
+            if (confirm('Are you sure you want to remove this child profile?')) {
                 kids = kids.filter(k => k.id !== id);
-                saveData();
-                renderParentPortal();
+                setStoredData('kids', kids);
+                renderAdminManagement();
             }
         }
 
-        function removeTask(id) {
-            if (confirm("Remove this task from system?")) {
+        function addTask(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('new-task-name');
+            const categoryInput = document.getElementById('new-task-category');
+            const starsInput = document.getElementById('new-task-stars');
+
+            const name = nameInput.value.trim();
+            const category = categoryInput.value;
+            const stars = parseInt(starsInput.value) || 10;
+
+            if (name) {
+                const newTask = { id: 'task_' + Date.now(), name, category, stars };
+                tasks.push(newTask);
+                setStoredData('tasks', tasks);
+                nameInput.value = '';
+                starsInput.value = '';
+                renderAdminManagement();
+            }
+        }
+
+        function deleteTask(id) {
+            if (confirm('Are you sure you want to remove this task?')) {
                 tasks = tasks.filter(t => t.id !== id);
-                saveData();
-                renderParentPortal();
-            }
-        }
-
-        function triggerConfetti() {
-            if (typeof confetti === 'function') {
-                confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+                setStoredData('tasks', tasks);
+                renderAdminManagement();
             }
         }
     </script>
 </body>
 </html>
+Displaying kids_dashboard.html.
