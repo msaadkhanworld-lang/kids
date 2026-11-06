@@ -1,287 +1,923 @@
+kids_dashboard.html
+
+100%
+
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Kids Progress & Reward Hub</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
+
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
         h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+
         .glass-panel { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(16px); border: 1px solid rgba(226, 232, 240, 0.8); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
         .glass-panel:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02); }
+
         .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 700; }
+
         .tab-inactive { color: #64748b; font-weight: 500; }
+
         .tab-inactive:hover { color: #334155; }
+
         
+
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+
         .animate-float { animation: float 4s ease-in-out infinite; }
+
         
+
         @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px rgba(79, 70, 229, 0.3); } 50% { box-shadow: 0 0 30px rgba(79, 70, 229, 0.6); } }
+
         .glow-card { animation: pulse-glow 3s infinite; }
 
+
+
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
         .shimmer-bg { background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%); background-size: 200% 100%; animation: shimmer 3s infinite; }
 
+
+
         /* Custom scrollbar */
+
         ::-webkit-scrollbar { width: 8px; }
+
         ::-webkit-scrollbar-track { background: #f1f5f9; }
+
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
     </style>
+
 </head>
+
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
+
+
     <!-- Top Navigation Bar -->
+
     <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 transition-all duration-300">
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+
             <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchView('dashboard')">
+
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-200 group-hover:scale-105 transition-transform duration-300">
+
                     <i class="fa-solid fa-trophy text-xl animate-bounce"></i>
+
                 </div>
+
                 <div>
+
                     <h1 class="font-heading font-extrabold text-xl text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">Kids Progress Hub</h1>
+
                     <p class="text-xs text-slate-500 font-medium">Daily Goals, Tasks & Rewards</p>
+
                 </div>
+
             </div>
+
+
 
             <div class="flex items-center space-x-3">
+
                 <div id="current-date-display" class="hidden sm:flex items-center text-xs font-semibold bg-slate-100/80 text-slate-600 px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs">
+
                     <i class="fa-regular fa-calendar-days mr-2 text-indigo-500"></i> <span id="header-date-text"></span>
+
                 </div>
+
                 <button onclick="openParentModal()" class="flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white px-4.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-md shadow-slate-900/10 hover:shadow-lg active:scale-95 group">
+
                     <i class="fa-solid fa-lock text-xs text-indigo-400 group-hover:rotate-12 transition-transform"></i>
+
                     <span>Parent Admin</span>
+
                 </button>
+
             </div>
+
         </div>
+
     </header>
 
+
+
     <!-- Main Container -->
+
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
+
+
         <!-- Top Hero Banner -->
+
         <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 text-white p-8 sm:p-10 shadow-2xl">
+
             <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+
             <div class="absolute -left-10 -top-10 w-64 h-64 bg-violet-400/20 rounded-full blur-2xl pointer-events-none"></div>
+
             <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+
                 <div>
+
                     <div class="inline-flex items-center space-x-2 bg-white/15 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md mb-4 text-indigo-100 border border-white/20">
+
                         <i class="fa-solid fa-bolt text-amber-300 animate-bounce"></i>
+
                         <span>Live Family Performance & Leaderboard</span>
+
                     </div>
+
                     <h2 class="font-heading font-extrabold text-3xl sm:text-5xl tracking-tight leading-tight">Welcome to Family Star Hub! ⭐</h2>
+
                     <p class="text-indigo-100 mt-2.5 text-sm sm:text-base max-w-xl font-medium leading-relaxed">Complete your daily studies and helpful activities to earn stars, unlock rank levels, and win amazing rewards!</p>
+
                 </div>
+
                 <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-5 flex items-center space-x-6 shadow-inner">
+
                     <div class="text-center">
+
                         <span class="block text-3xl sm:text-4xl font-extrabold font-heading text-amber-300 transition-all transform hover:scale-110" id="stats-total-stars">0</span>
+
                         <span class="text-xs text-indigo-200 uppercase tracking-wider font-bold mt-0.5 block">Total Stars</span>
+
                     </div>
+
                     <div class="w-px h-12 bg-white/20"></div>
+
                     <div class="text-center">
+
                         <span class="block text-3xl sm:text-4xl font-extrabold font-heading text-emerald-300 transition-all transform hover:scale-110" id="stats-completed-today">0</span>
+
                         <span class="text-xs text-indigo-200 uppercase tracking-wider font-bold mt-0.5 block">Done Today</span>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
+
 
         <!-- Podium & Leaderboard Section -->
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
             <!-- Left 2 Cols: Leaderboard & Kids Breakdown -->
+
             <div class="lg:col-span-2 space-y-6">
+
                 <div class="flex items-center justify-between">
+
                     <h3 class="font-heading font-bold text-xl text-slate-900 flex items-center gap-2.5">
+
                         <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm shadow-2xs">
+
                             <i class="fa-solid fa-medal"></i>
+
                         </div>
+
                         Kids Scoreboard & Breakdown
+
                     </h3>
+
                     <div class="text-xs font-semibold text-slate-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs flex items-center gap-2">
+
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+
                         Viewing: <span id="active-date-badge" class="text-indigo-600 font-bold">Today</span>
+
                     </div>
+
                 </div>
+
+
 
                 <!-- Kids Cards Container -->
+
                 <div id="kids-dashboard-container" class="space-y-6">
+
                     <!-- Populated dynamically -->
+
                 </div>
+
             </div>
+
+
 
             <!-- Right Col: Podium / Top Ranker & Quick Info -->
+
             <div class="space-y-6">
+
                 <div class="glass-panel rounded-3xl p-6 shadow-sm border border-slate-200/80">
+
                     <h3 class="font-heading font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+
                         <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-xs shadow-2xs">
+
                             <i class="fa-solid fa-crown"></i>
+
                         </div>
+
                         Today's Podium Leader
+
                     </h3>
+
                     <div id="podium-container" class="text-center py-8 px-4 bg-gradient-to-b from-slate-50/80 to-indigo-50/40 rounded-2xl border border-indigo-100/60 shadow-inner relative overflow-hidden">
+
                         <!-- Populated dynamically -->
+
                     </div>
+
                 </div>
 
+
+
                 <!-- Reward Levels Info Card -->
+
                 <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
+
                     <h3 class="font-heading font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+
                         <div class="w-7 h-7 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-xs shadow-2xs">
+
                             <i class="fa-solid fa-shield-halved"></i>
+
                         </div>
+
                         Badge Tiers
+
                     </h3>
+
                     <div class="space-y-3 text-sm">
+
                         <div class="flex items-center justify-between p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/70 transition-all hover:scale-[1.02]">
+
                             <span class="font-bold text-amber-800 flex items-center gap-2.5"><i class="fa-solid fa-medal text-amber-600 text-base"></i> Bronze Explorer</span>
+
                             <span class="text-xs font-bold text-amber-700 bg-amber-100/80 px-3 py-1 rounded-full shadow-2xs">0 - 49 Stars</span>
+
                         </div>
+
                         <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-100/80 border border-slate-300/70 transition-all hover:scale-[1.02]">
+
                             <span class="font-bold text-slate-700 flex items-center gap-2.5"><i class="fa-solid fa-medal text-slate-500 text-base"></i> Silver Scholar</span>
+
                             <span class="text-xs font-bold text-slate-600 bg-slate-200/80 px-3 py-1 rounded-full shadow-2xs">50 - 149 Stars</span>
+
                         </div>
+
                         <div class="flex items-center justify-between p-3.5 rounded-2xl bg-yellow-50/80 border border-yellow-200/70 transition-all hover:scale-[1.02]">
+
                             <span class="font-bold text-yellow-800 flex items-center gap-2.5"><i class="fa-solid fa-award text-yellow-600 text-base"></i> Gold Champion</span>
+
                             <span class="text-xs font-bold text-yellow-700 bg-yellow-100/80 px-3 py-1 rounded-full shadow-2xs">150 - 299 Stars</span>
+
                         </div>
+
                         <div class="flex items-center justify-between p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200/70 transition-all hover:scale-[1.02]">
+
                             <span class="font-bold text-indigo-900 flex items-center gap-2.5"><i class="fa-solid fa-gem text-indigo-600 text-base"></i> Diamond Legend</span>
+
                             <span class="text-xs font-bold text-indigo-700 bg-indigo-100/80 px-3 py-1 rounded-full shadow-2xs">300+ Stars</span>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
+
 
     </main>
 
+
+
     <!-- Footer -->
+
     <footer class="mt-auto border-t border-slate-200 bg-white py-6">
+
         <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 font-medium">
+
             Kids Daily Progress & Reward Hub &bull; Designed for Family Excellence with Animations
+
         </div>
+
     </footer>
 
+
+
     <!-- PIN Modal -->
+
     <div id="pin-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all duration-300">
+
         <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+
             <div class="text-center mb-6">
+
                 <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
+
                     <i class="fa-solid fa-lock text-2xl animate-pulse"></i>
+
                 </div>
+
                 <h3 class="font-heading font-extrabold text-2xl text-slate-900">Parent Access PIN</h3>
+
                 <p class="text-xs text-slate-500 mt-1 font-medium">Enter your 4-digit PIN to access the Parent Admin Portal (Default: 1234)</p>
+
             </div>
+
             <form onsubmit="verifyPin(event)" class="space-y-4">
+
                 <div>
+
                     <input type="password" id="pin-input" maxlength="4" placeholder="••••" class="w-full text-center tracking-[1em] text-3xl py-3.5 px-4 rounded-2xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-600 bg-slate-50 font-bold transition-all" autofocus required>
+
                 </div>
+
                 <div id="pin-error" class="text-xs text-rose-500 font-semibold text-center hidden bg-rose-50 py-2 rounded-xl border border-rose-100">Incorrect PIN. Try '1234'.</div>
+
                 <div class="flex space-x-3 pt-2">
+
                     <button type="button" onclick="closePinModal()" class="w-1/2 py-3.5 px-4 rounded-2xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors">Cancel</button>
+
                     <button type="submit" class="w-1/2 py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 active:scale-95">Unlock Panel</button>
+
                 </div>
+
             </form>
+
         </div>
+
     </div>
 
+
+
     <!-- Parent Admin Portal Modal / Full Overlay -->
+
     <div id="parent-admin-modal" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md hidden overflow-y-auto transition-all duration-300">
+
         <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+
             <div class="bg-white rounded-3xl max-w-5xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative my-auto animate-in fade-in zoom-in-95 duration-200">
+
                 <!-- Modal Header -->
+
                 <div class="flex items-center justify-between pb-6 border-b border-slate-200 mb-6">
+
                     <div class="flex items-center space-x-3">
+
                         <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30">
+
                             <i class="fa-solid fa-sliders text-xl"></i>
+
                         </div>
+
                         <div>
+
                             <h3 class="font-heading font-extrabold text-xl text-slate-900">Parent Admin Portal</h3>
+
                             <p class="text-xs text-slate-500 font-medium">Manage daily tasks, mark completions, and configure kids</p>
+
                         </div>
+
                     </div>
+
                     <button onclick="closeParentModal()" class="w-11 h-11 rounded-2xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors active:scale-95">
+
                         <i class="fa-solid fa-xmark text-lg"></i>
+
                     </button>
+
                 </div>
+
+
 
                 <!-- Admin Tabs -->
+
                 <div class="flex border-b border-slate-200 mb-6 space-x-8">
+
                     <button onclick="switchAdminTab('scoring')" id="admin-tab-scoring" class="pb-3 text-sm tab-active transition-all flex items-center gap-2 font-bold">
+
                         <i class="fa-regular fa-square-check text-base"></i> Daily Scorecard & Marking
+
                     </button>
+
                     <button onclick="switchAdminTab('management')" id="admin-tab-management" class="pb-3 text-sm tab-inactive transition-all flex items-center gap-2 font-bold">
+
                         <i class="fa-solid fa-users-gear text-base"></i> Manage Kids & Tasks
+
                     </button>
+
                 </div>
+
+
 
                 <!-- Tab 1: Scoring & Marking -->
+
                 <div id="admin-content-scoring" class="space-y-6">
+
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80">
+
                         <div class="flex items-center space-x-3">
+
                             <label for="admin-date-picker" class="text-sm font-bold text-slate-700 flex items-center gap-2">
+
                                 <i class="fa-regular fa-calendar text-indigo-600"></i> Select Date:
+
                             </label>
+
                             <input type="date" id="admin-date-picker" onchange="onAdminDateChange(this.value)" class="bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs">
+
                         </div>
+
                         <div class="text-xs text-indigo-700 font-medium bg-indigo-50/80 px-3.5 py-2 rounded-xl border border-indigo-100 flex items-center">
+
                             <i class="fa-solid fa-circle-info mr-1.5 text-indigo-500"></i> Check tasks completed for the selected date. Changes save instantly!
+
                         </div>
+
                     </div>
+
+
 
                     <!-- Kids Scoring List -->
+
                     <div id="admin-scoring-container" class="space-y-6">
+
                         <!-- Populated dynamically -->
+
                     </div>
+
                 </div>
 
+
+
                 <!-- Tab 2: Manage Kids & Tasks -->
+
                 <div id="admin-content-management" class="space-y-8 hidden">
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
                         <!-- Kids Management -->
+
                         <div class="space-y-4 bg-slate-50/80 p-6 rounded-3xl border border-slate-200/80">
+
                             <div class="flex items-center justify-between">
+
                                 <h4 class="font-heading font-bold text-base text-slate-900 flex items-center gap-2">
+
                                     <i class="fa-solid fa-child text-indigo-600"></i> Children Profiles
+
                                 </h4>
+
                             </div>
+
                             <form onsubmit="addKid(event)" class="flex gap-2.5">
+
                                 <input type="text" id="new-kid-name" placeholder="Kid's Name" class="flex-grow bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-medium" required>
+
                                 <select id="new-kid-avatar" class="bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-semibold">
+
                                     <option value="🦁">🦁 Lion</option>
+
                                     <option value="🦄">🦄 Unicorn</option>
+
                                     <option value="🚀">🚀 Rocket</option>
+
                                     <option value="🐼">🐼 Panda</option>
+
                                     <option value="🐯">🐯 Tiger</option>
+
                                     <option value="🦊">🦊 Fox</option>
+
                                     <option value="🦖">🦖 Dino</option>
+
                                 </select>
+
                                 <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-md shadow-indigo-600/25 active:scale-95">Add</button>
+
                             </form>
+
                             <div id="admin-kids-list" class="space-y-2.5 mt-4">
+
                                 <!-- Populated dynamically -->
+
                             </div>
+
                         </div>
 
+
+
                         <!-- Tasks Management -->
+
                         <div class="space-y-4 bg-slate-50/80 p-6 rounded-3xl border border-slate-200/80">
+
                             <div class="flex items-center justify-between">
+
                                 <h4 class="font-heading font-bold text-base text-slate-900 flex items-center gap-2">
+
                                     <i class="fa-solid fa-list-check text-indigo-600"></i> Daily Task Library
+
                                 </h4>
+
                             </div>
+
                             <form onsubmit="addTask(event)" class="space-y-3">
+
                                 <input type="text" id="new-task-name" placeholder="Task Name (e.g. Read 20 mins)" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-medium" required>
+
                                 <div class="grid grid-cols-2 gap-2.5">
+
                                     <select id="new-task-category" class="bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-semibold">
+
                                         <option value="studies">📚 Studies & Homework</option>
+
                                         <option value="activities">🌟 Activities & Chores</option>
+
                                     </select>
-                                    <!-- min="1" removed to allow negative or zero star values -->
-                                    <input type="number" id="new-task-stars" placeholder="Stars (e.g. 10)" max="50" class="bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-semibold" required>
+
+                                    <input type="number" id="new-task-stars" placeholder="Stars (e.g. 10)" min="1" max="50" class="bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-semibold" required>
+
                                 </div>
-                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text
+
+                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-sm font-semibold transition-all shadow-md shadow-indigo-600/25 active:scale-95">Add Task</button>
+
+                            </form>
+
+                            <div id="admin-tasks-list" class="space-y-2.5 mt-4 max-h-52 overflow-y-auto pr-1">
+
+                                <!-- Populated dynamically -->
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Modal Footer -->
+
+                <div class="pt-6 border-t border-slate-200 mt-6 flex justify-end">
+
+                    <button onclick="closeParentModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-7 py-3 rounded-2xl text-sm font-semibold transition-all shadow-md active:scale-95">Done / Exit Portal</button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Application Script -->
+
+    <script>
+
+        const DEFAULT_KIDS = [
+
+            { id: 'kid_1', name: 'Alex', avatar: '🦁' },
+
+            { id: 'kid_2', name: 'Maya', avatar: '🦄' },
+
+            { id: 'kid_3', name: 'Sam', avatar: '🚀' }
+
+        ];
+
+
+
+        const DEFAULT_TASKS = [
+
+            { id: 'task_1', name: 'Quran / Islamic Studies 20m', category: 'studies', stars: 10 },
+
+            { id: 'task_2', name: 'School Homework & Math Practice', category: 'studies', stars: 15 },
+
+            { id: 'task_3', name: 'English Reading & Vocabulary', category: 'studies', stars: 10 },
+
+            { id: 'task_4', name: 'Clean Room & Organize Desk', category: 'activities', stars: 10 },
+
+            { id: 'task_5', name: 'Physical Exercise / Sports 30m', category: 'activities', stars: 15 },
+
+            { id: 'task_6', name: 'Help Parents with Chores', category: 'activities', stars: 10 }
+
+        ];
+
+
+
+        function getStoredData(key, fallback) {
+
+            const data = localStorage.getItem('kids_hub_' + key);
+
+            return data ? JSON.parse(data) : fallback;
+
+        }
+
+
+
+        function setStoredData(key, value) {
+
+            localStorage.setItem('kids_hub_' + key, JSON.stringify(value));
+
+        }
+
+
+
+        let kids = getStoredData('kids', DEFAULT_KIDS);
+
+        let tasks = getStoredData('tasks', DEFAULT_TASKS);
+
+        let records = getStoredData('records', {});
+
+
+
+        function getTodayString() {
+
+            const d = new Date();
+
+            return d.toISOString().split('T')[0];
+
+        }
+
+
+
+        let activeDate = getTodayString();
+
+
+
+        function getBadgeInfo(totalStars) {
+
+            if (totalStars >= 300) return { name: 'Diamond Legend', icon: 'fa-gem', color: 'bg-indigo-100/90 text-indigo-900 border-indigo-300', badgeColor: 'text-indigo-600' };
+
+            if (totalStars >= 150) return { name: 'Gold Champion', icon: 'fa-award', color: 'bg-amber-100/90 text-amber-900 border-amber-300', badgeColor: 'text-amber-600' };
+
+            if (totalStars >= 50) return { name: 'Silver Scholar', icon: 'fa-medal', color: 'bg-slate-200/90 text-slate-800 border-slate-300', badgeColor: 'text-slate-600' };
+
+            return { name: 'Bronze Explorer', icon: 'fa-medal', color: 'bg-amber-50/90 text-amber-900 border-amber-200', badgeColor: 'text-amber-700' };
+
+        }
+
+
+
+        function getKidTotalStars(kidId) {
+
+            let total = 0;
+
+            for (let dateKey in records) {
+
+                if (records[dateKey][kidId]) {
+
+                    for (let taskId in records[dateKey][kidId]) {
+
+                        if (records[dateKey][kidId][taskId]) {
+
+                            const taskObj = tasks.find(t => t.id === taskId);
+
+                            if (taskObj) total += taskObj.stars;
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+            return total;
+
+        }
+
+
+
+        function getKidDateStars(kidId, dateStr) {
+
+            let total = 0;
+
+            if (records[dateStr] && records[dateStr][kidId]) {
+
+                for (let taskId in records[dateStr][kidId]) {
+
+                    if (records[dateStr][kidId][taskId]) {
+
+                        const taskObj = tasks.find(t => t.id === taskId);
+
+                        if (taskObj) total += taskObj.stars;
+
+                    }
+
+                }
+
+            }
+
+            return total;
+
+        }
+
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+
+            document.getElementById('header-date-text').innerText = new Date().toLocaleDateString('en-US', options);
+
+            document.getElementById('admin-date-picker').value = activeDate;
+
+            renderDashboard();
+
+        });
+
+
+
+        function renderDashboard() {
+
+            document.getElementById('active-date-badge').innerText = activeDate === getTodayString() ? 'Today (' + activeDate + ')' : activeDate;
+
+
+
+            let grandTotalStars = 0;
+
+            let todayCompletedCount = 0;
+
+
+
+            kids.forEach(kid => {
+
+                grandTotalStars += getKidTotalStars(kid.id);
+
+                if (records[activeDate] && records[activeDate][kid.id]) {
+
+                    Object.values(records[activeDate][kid.id]).forEach(val => {
+
+                        if (val) todayCompletedCount++;
+
+                    });
+
+                }
+
+            });
+
+
+
+            document.getElementById('stats-total-stars').innerText = grandTotalStars;
+
+            document.getElementById('stats-completed-today').innerText = todayCompletedCount;
+
+
+
+            const rankedKids = [...kids].map(kid => {
+
+                const dateStars = getKidDateStars(kid.id, activeDate);
+
+                const totalStars = getKidTotalStars(kid.id);
+
+                const badge = getBadgeInfo(totalStars);
+
+                return { ...kid, dateStars, totalStars, badge };
+
+            }).sort((a, b) => b.dateStars - a.dateStars || b.totalStars - a.totalStars);
+
+
+
+            const podiumEl = document.getElementById('podium-container');
+
+            if (rankedKids.length === 0) {
+
+                podiumEl.innerHTML = `<p class="text-xs text-slate-500">No kids added yet. Use Parent Admin to add kids.</p>`;
+
+            } else {
+
+                const topKid = rankedKids[0];
+
+                podiumEl.innerHTML = `
+
+                    <div class="relative inline-block mb-3 animate-float">
+
+                        <span class="text-5xl">${topKid.avatar}</span>
+
+                        <span class="absolute -top-2.5 -right-2.5 bg-amber-400 text-slate-900 rounded-full w-7 h-7 flex items-center justify-center text-xs font-black shadow-lg animate-bounce"><i class="fa-solid fa-crown text-xs"></i></span>
+
+                    </div>
+
+                    <h4 class="font-heading font-extrabold text-xl text-slate-900">${topKid.name}</h4>
+
+                    <p class="text-xs font-bold text-indigo-600 mt-1">${topKid.dateStars} Stars Today (${topKid.totalStars} Total)</p>
+
+                    <div class="mt-3.5 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border ${topKid.badge.color} shadow-2xs">
+
+                        <i class="fa-solid ${topKid.badge.icon} ${topKid.badge.badgeColor}"></i> ${topKid.badge.name}
+
+                    </div>
+
+                `;
+
+            }
+
+
+
+            const container = document.getElementById('kids-dashboard-container');
+
+            if (kids.length === 0) {
+
+                container.innerHTML = `
+
+                    <div class="glass-panel rounded-3xl p-8 text-center border border-slate-200">
+
+                        <p class="text-slate-500 text-sm font-medium">No children profiles found. Click <strong>Parent Admin</strong> above to get started.</p>
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+
+            let html = '';
+
+            rankedKids.forEach((kid, index) => {
+
+                const studiesTasks = tasks.filter(t => t.category === 'studies');
+
+                const activitiesTasks = tasks.filter(t => t.category === 'activities');
+
+
+
+                let studiesCompleted = 0;
+
+                studiesTasks.forEach(t => {
+
+                    if (records[activeDate] && records[activeDate][kid.id] && records[activeDate][kid.id][t.id]) studiesCompleted++;
+
+                });
+
+
+
+                let activitiesCompleted = 0;
+
+                activitiesTasks.forEach(t => {
+
+                    if (records[activeDate] && records[activeDate][kid.id] && records[activeDate][kid.id][t.id]) activitiesCompleted++;
+
+                });
+
+
+
+                const studiesPercent = studiesTasks.length ? Math.round((studiesCompleted / studiesTasks.length) * 100) : 0;
+
+                const activitiesPercent = activitiesTasks.length ? Math.round((activitiesCompleted / activitiesTasks.length) * 100) : 0;
+
+
+
+                let rankBadge = '';
+
+                if (index === 0) rankBadge = `<span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs"><i class="fa-solid fa-trophy text-amber-500"></i> 1st Place</span>`;
+
+                else if (index === 1) rankBadge = `<span class="bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs"><i class="fa-solid fa-medal text-slate-500"></i> 2nd Place</span>`;
+
+                else if (index === 2) rankBadge = `<span class="bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs"><i class="fa-solid fa-medal text-amber-700"></i> 3rd Place</span>`;
+
+
+
+                html += `
+
+                    <div class="glass-panel rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-200/80 hover:shadow-xl transition-all duration-300">
+
+                        <div 
